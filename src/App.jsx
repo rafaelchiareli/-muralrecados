@@ -1,4 +1,4 @@
-import {useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 
 //url da nossa api
@@ -11,41 +11,41 @@ const CORES_CARTAO = [
   { valor: '#c66b3d', nome: 'Terracota' },
 ];
 
-export default function App(){
+export default function App() {
   //estado para a lista de recados
-  const [recados,setRecados] = useState([]);
+  const [recados, setRecados] = useState([]);
   //estado para fazer o loading
   const [loading, setLoading] = useState(true);
   //estados para o formulário
   const [autor, setAutor] = useState('');
   const [mensagem, setMensagem] = useState('');
   const [cor, setCor] = useState(CORES_CARTAO[0].valor);
-  
+
   useEffect(() => {
-    async function carregarRecados(){
-      try{
+    async function carregarRecados() {
+      try {
         const res = await fetch(API_URL);
         const data = await res.json();
         console.log('dados', data);
         setRecados(data);
-      }catch(error) {
+      } catch (error) {
         console.error('erro ao carregar os recados', error);
-      }finally{
+      } finally {
         setLoading(false);
       }
     }
 
     carregarRecados();
-  },[]);
+  }, []);
   //função para postar uma mensagem
-  async function handleSubmit(e){
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!autor.trim() || !mensagem.trim()) return;
-    try{
+    try {
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({autor, mensagem, cor})
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ autor, mensagem, cor })
       });
       if (res.ok) {
         const novoRecado = await res.json();
@@ -53,12 +53,40 @@ export default function App(){
         setRecados([novoRecado, ...recados]);
         setMensagem('');
       }
-    }catch(error){
+    } catch (error) {
       console.error('erro ao criar o recado', error);
     }
-  }  
+  }
+//função para curtir a postagem
+async function handleCurtir(id){
+  try{
+    const res = await fetch(`${API_URL}/${id}/curtir`, 
+      {method : 'POST'}
+    );
+    if (res.ok){
+      const recadoAtualizado = await res.json();
+      setRecados(
+        recados.map((item) => (item.id == id ? recadoAtualizado : item))
+      );
+    }
+  }catch (error) {
+    console.error('erro ao curtir o recado', error);
+  }
+}
 
-
+//funçao que deleta o recado
+async function handleDeletar(id){
+  try{
+    const res = await fetch(`${API_URL}/${id}`, {method: 'DELETE'});
+    if (res.ok){
+      setRecados(
+        recados.filter((item) => item.id !== id)
+      );
+    }
+  }catch (error){
+    console.error("erro ao excluir recado", error);
+  }
+}
   return (
     <div className='container'>
       <header className='page-header'>
@@ -98,7 +126,7 @@ export default function App(){
                     type='button'
                     className={`color-option${cor === opcao.valor ? ' is-selected' : ''}`}
                     key={opcao.valor}
-                    style={{backgroundColor: opcao.valor}}
+                    style={{ backgroundColor: opcao.valor }}
                     aria-label={`Usar a cor ${opcao.nome}`}
                     aria-pressed={cor === opcao.valor}
                     title={opcao.nome}
@@ -122,18 +150,22 @@ export default function App(){
 
           <div className='mural'>
             {loading ? (<p className='empty-state'>Carregando recados...</p>)
-            : recados.length === 0 ? (<p className='empty-state'>Nenhum recado ainda. Seja o primeiro a publicar.</p>)
-            : (recados.map((item) => (
-              <article key={item.id} className='recado-card' style={{backgroundColor : item.cor}}>
-                <div className='card-header'>
-                  <strong>{item.autor}</strong>
-                </div>
-                <p className='card-body'>{item.mensagem}</p>
-                <div className='card-footer'>
-                  <span className='like-count'>Curtidas: {item.curtidas ?? 0}</span>
-                </div>
-              </article>
-            )))
+              : recados.length === 0 ? (<p className='empty-state'>Nenhum recado ainda. Seja o primeiro a publicar.</p>)
+                : (recados.map((item) => (
+                  <article key={item.id} className='recado-card' style={{ backgroundColor: item.cor }}>
+                    <div className='card-header'>
+                      <strong>&#128100;{item.autor}</strong>
+                      <button onClick={() => handleDeletar(item.id)} className='btn-delete'
+                      >&#128465;</button>
+                    </div>
+                    <p className='card-body'>{item.mensagem}</p>
+                    <div className='card-footer'>
+                      <button onClick={() => handleCurtir(item.id)} className='btn-like'>
+                        &#10084;{item.curtidas}
+                      </button>
+                    </div>
+                  </article>
+                )))
             }
           </div>
         </main>
