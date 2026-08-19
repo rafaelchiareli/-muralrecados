@@ -3,7 +3,7 @@ const API_URL = '177.190.80.28:4000/api/recados';
 export async function buscarRecados(){
     const res = await fetch(API_URL);
     if(!res.ok)
-         throw new Error('Erro ao buscar os recados');c
+         throw new Error('Erro ao buscar os recados');
     return res.json();
 }
 

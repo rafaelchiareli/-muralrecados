@@ -19,10 +19,12 @@ export default function FormularioRecado({onAdicionarRecado}){
         }
     }
 
+    const CORES_CARTAO = ["#fef08a", "#dcfce7", "#dbeafe", "#fbcfe8"];
+
     return (
         <>
         <form onSubmit={handleSubmit} className="form-card">
-              <form className='form-card' onSubmit={handleSubmit}>
+             
             <h2>Novo recado</h2>
 
             <label htmlFor='autor'>Seu nome</label>
@@ -69,7 +71,7 @@ export default function FormularioRecado({onAdicionarRecado}){
                 {enviando ? "Enviando" : "Publicar"}
             </button>
           </form>
-        </form>
+       
         </>
     )
 }
